@@ -1,0 +1,21 @@
+!.gitignore
+
+build/
+target/
+.idea/
+.claude/
+.DS_Store
+*.iml
+
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# virtual machine crash logs
+hs_err_pid*
+
+# Eclipse
+.settings/
+.classpath
+.project

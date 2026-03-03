@@ -1,0 +1,34 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "readContent": {
+            "title": "Read content",
+            "description": "Enable to read the content of the request or response in your script.",
+            "type": "boolean",
+            "default": false
+        },
+        "overrideContent": {
+            "title": "Override content",
+            "description": "Enable to override the content with the value returned by your script.",
+            "type": "boolean",
+            "default": false
+        },
+        "script": {
+            "title": "Script",
+            "description": "JavaScript script to evaluate.",
+            "type": "string",
+            "format": "gio-code-editor",
+            "x-schema-form": {
+                "type": "codemirror",
+                "codemirrorOptions": {
+                    "placeholder": "Put your JavaScript script here",
+                    "lineWrapping": true,
+                    "lineNumbers": true,
+                    "mode": "javascript"
+                }
+            }
+        }
+    },
+    "required": ["script"]
+}
