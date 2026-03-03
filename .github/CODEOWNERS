@@ -1,0 +1,3 @@
+# Default
+*             @gravitee-io/apim @gravitee-io/cockpit
+pom.xml       @gravitee-io/apim @gravitee-io/cockpit app/renovate-approve

@@ -1,0 +1,4 @@
+rows:
+    - data:
+          key: JS_EXECUTION_FAILURE
+          params: "Interrupted with a 500 status. Occurs when the JavaScript script throws an error or exceeds the execution timeout."
