@@ -74,7 +74,7 @@ public class JsPolicy implements HttpPolicy {
     }
 
     private ExecutionFailure toFailure(BaseExecutionContext ctx, Throwable e) {
-        ctx.withLogger(log).warn("JavaScript execution failed", e);
+        ctx.withLogger(log).warn("JavaScript execution failed");
         String message = (e instanceof PolyglotException pe && pe.isCancelled()) ? "Timeout" : "JavaScript execution failed";
         return new ExecutionFailure(INTERNAL_SERVER_ERROR_500).key(ERROR_KEY).message(message);
     }
