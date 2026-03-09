@@ -1,0 +1,68 @@
+{
+    "id": "api-subscribe",
+    "name": "api-subscribe",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "message",
+    "analytics": { "enabled": true },
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [{ "path": "/test" }],
+            "entrypoints": [
+                {
+                    "type": "http-get",
+                    "configuration": {
+                        "messagesLimitCount": 2,
+                        "messagesLimitDurationMs": 5000,
+                        "headersInPayload": true,
+                        "metadataInPayload": true
+                    }
+                },
+                {
+                    "type": "http-post",
+                    "configuration": {
+                        "requestHeadersToMessage": true
+                    }
+                }
+            ]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "mock",
+            "endpoints": [
+                {
+                    "name": "default-endpoint",
+                    "type": "mock",
+                    "weight": 1,
+                    "inheritConfiguration": false,
+                    "configuration": {
+                        "messageInterval": 1,
+                        "messageContent": "{\"message\":\"Hello World!\"}",
+                        "messageCount": 20
+                    }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [{ "type": "http", "path": "/", "pathOperator": "STARTS_WITH" }],
+            "subscribe": [
+                {
+                    "name": "JS",
+                    "enabled": true,
+                    "policy": "js",
+                    "configuration": {
+                        "script": "message.headers().set('x-phase', 'on-response-message');\nmessage.content(JSON.stringify({ message: 'Hello Universe!' }));"
+                    }
+                }
+            ],
+            "publish": []
+        }
+    ]
+}
