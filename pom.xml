@@ -39,6 +39,9 @@
         <gravitee-node.version>8.0.0-alpha.10</gravitee-node.version>
         <graalvm.version>23.1.10</graalvm.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <gravitee-entrypoint-http-get.version>2.1.0</gravitee-entrypoint-http-get.version>
+        <gravitee-entrypoint-http-post.version>2.1.0</gravitee-entrypoint-http-post.version>
+        <gravitee-reactor-message.version>10.0.0-alpha.2</gravitee-reactor-message.version>
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
     </properties>
 
@@ -146,6 +149,27 @@
             <groupId>io.gravitee.apim.plugin.endpoint</groupId>
             <artifactId>gravitee-apim-plugin-endpoint-mock</artifactId>
             <version>${gravitee-apim.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.graviteesource.entrypoint</groupId>
+            <artifactId>gravitee-entrypoint-http-get</artifactId>
+            <version>${gravitee-entrypoint-http-get.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.graviteesource.entrypoint</groupId>
+            <artifactId>gravitee-entrypoint-http-post</artifactId>
+            <version>${gravitee-entrypoint-http-post.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.graviteesource.reactor</groupId>
+            <artifactId>gravitee-reactor-message</artifactId>
+            <version>${gravitee-reactor-message.version}</version>
             <scope>test</scope>
         </dependency>
 

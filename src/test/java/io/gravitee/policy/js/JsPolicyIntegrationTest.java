@@ -20,21 +20,35 @@ import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.graviteesource.entrypoint.http.get.HttpGetEntrypointConnectorFactory;
+import com.graviteesource.entrypoint.http.post.HttpPostEntrypointConnectorFactory;
+import com.graviteesource.reactor.message.MessageApiReactorFactory;
 import io.gravitee.apim.gateway.tests.sdk.AbstractPolicyTest;
 import io.gravitee.apim.gateway.tests.sdk.annotations.DeployApi;
 import io.gravitee.apim.gateway.tests.sdk.annotations.GatewayTest;
 import io.gravitee.apim.gateway.tests.sdk.connector.EndpointBuilder;
 import io.gravitee.apim.gateway.tests.sdk.connector.EntrypointBuilder;
+import io.gravitee.apim.gateway.tests.sdk.connector.fakes.MessageStorage;
+import io.gravitee.apim.gateway.tests.sdk.connector.fakes.PersistentMockEndpointConnectorFactory;
+import io.gravitee.apim.gateway.tests.sdk.reactor.ReactorBuilder;
+import io.gravitee.apim.plugin.reactor.ReactorPlugin;
+import io.gravitee.common.http.MediaType;
+import io.gravitee.gateway.api.http.HttpHeaderNames;
+import io.gravitee.gateway.reactive.reactor.v4.reactor.ReactorFactory;
 import io.gravitee.plugin.endpoint.EndpointConnectorPlugin;
 import io.gravitee.plugin.endpoint.http.proxy.HttpProxyEndpointConnectorFactory;
 import io.gravitee.plugin.entrypoint.EntrypointConnectorPlugin;
 import io.gravitee.plugin.entrypoint.http.proxy.HttpProxyEntrypointConnectorFactory;
 import io.vertx.core.json.JsonObject;
+import io.vertx.rxjava3.core.buffer.Buffer;
 import io.vertx.rxjava3.core.http.HttpClient;
 import io.vertx.rxjava3.core.http.HttpClientRequest;
 import io.vertx.rxjava3.core.http.HttpClientResponse;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -373,6 +387,115 @@ public class JsPolicyIntegrationTest {
                 .awaitDone(5, TimeUnit.SECONDS)
                 .assertComplete()
                 .assertNoErrors();
+        }
+    }
+
+    abstract static class AbstractMessageTest extends AbstractPolicyTest<JsPolicy, JsPolicyConfiguration> {
+
+        @Override
+        public void configureReactors(Set<ReactorPlugin<? extends ReactorFactory<?>>> reactors) {
+            reactors.add(ReactorBuilder.build(MessageApiReactorFactory.class));
+        }
+    }
+
+    @GatewayTest
+    @Nested
+    class SubscribeTest extends AbstractMessageTest {
+
+        @Override
+        public void configureEntrypoints(Map<String, EntrypointConnectorPlugin<?, ?>> entrypoints) {
+            entrypoints.putIfAbsent("http-get", EntrypointBuilder.build("http-get", HttpGetEntrypointConnectorFactory.class));
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-subscribe.json")
+        void should_transform_subscribe_messages(HttpClient client) {
+            client
+                .rxRequest(GET, "/test")
+                .map(request -> request.putHeader(HttpHeaderNames.ACCEPT.toString(), MediaType.APPLICATION_JSON))
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .flatMap(HttpClientResponse::body)
+                .map(Buffer::toString)
+                .map(json -> new JsonObject(json).getJsonArray("items"))
+                .doOnSuccess(items -> assertThat(items).hasSize(2))
+                .doOnSuccess(items ->
+                    items.forEach(item -> {
+                        var message = (JsonObject) item;
+                        assertThat(message.getString("content")).isEqualTo(EXPECTED_CONTENT.toString());
+                        var headers = message.getJsonObject("headers");
+                        assertThat(headers.getJsonArray("x-phase").getString(0)).isEqualTo("on-response-message");
+                    })
+                )
+                .test()
+                .awaitDone(10, TimeUnit.SECONDS)
+                .assertNoErrors()
+                .assertComplete();
+        }
+    }
+
+    @GatewayTest
+    @Nested
+    class PublishTest extends AbstractMessageTest {
+
+        private MessageStorage messageStorage;
+
+        @Override
+        public void configureEntrypoints(Map<String, EntrypointConnectorPlugin<?, ?>> entrypoints) {
+            entrypoints.putIfAbsent("http-post", EntrypointBuilder.build("http-post", HttpPostEntrypointConnectorFactory.class));
+        }
+
+        @Override
+        public void configureEndpoints(Map<String, EndpointConnectorPlugin<?, ?>> endpoints) {
+            endpoints.putIfAbsent("mock", EndpointBuilder.build("mock", PersistentMockEndpointConnectorFactory.class));
+        }
+
+        @BeforeEach
+        void setUp() {
+            messageStorage = getBean(MessageStorage.class);
+        }
+
+        @AfterEach
+        void tearDown() {
+            messageStorage.reset();
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-publish.json")
+        void should_transform_publish_messages(HttpClient client) {
+            client
+                .rxRequest(POST, "/test")
+                .flatMap(request -> request.rxSend(GIVEN_CONTENT.toString()))
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(202))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertNoErrors()
+                .assertComplete();
+
+            messageStorage
+                .subject()
+                .doOnNext(message -> assertThat(message.content()).hasToString(EXPECTED_CONTENT.toString()))
+                .doOnNext(message -> assertThat(message.attributes()).containsEntry("message.mutated", true))
+                .test()
+                .assertNoErrors()
+                .dispose();
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-publish-script-error.json")
+        void should_return_500_on_publish_script_error(HttpClient client) {
+            client
+                .rxRequest(POST, "/test")
+                .flatMap(request -> request.rxSend(GIVEN_CONTENT.toString()))
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(500))
+                .flatMap(HttpClientResponse::body)
+                .doOnSuccess(body -> assertThat(body).hasToString("JavaScript execution failed"))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertNoErrors()
+                .assertComplete();
+
+            messageStorage.subject().test().assertNoValues().dispose();
         }
     }
 }

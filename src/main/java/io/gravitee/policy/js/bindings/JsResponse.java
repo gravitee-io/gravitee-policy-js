@@ -25,6 +25,7 @@ public class JsResponse {
     private final HttpBaseResponse response;
     private final JsHeaders headers;
     private final JsHeaders trailers;
+    private String content;
 
     public JsResponse(HttpBaseResponse response) {
         this.response = response;
@@ -66,8 +67,6 @@ public class JsResponse {
     public JsHeaders trailers() {
         return trailers;
     }
-
-    private String content;
 
     @HostAccess.Export
     public String content() {
