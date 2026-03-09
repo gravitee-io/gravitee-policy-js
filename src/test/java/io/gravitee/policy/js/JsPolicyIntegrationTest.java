@@ -240,6 +240,47 @@ public class JsPolicyIntegrationTest {
         }
 
         @Test
+        @DeployApi("/apis/v4/api-request-fail-then-throw.json")
+        void should_use_error_status_when_script_fails_then_throws(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(500))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(0, anyRequestedFor(anyUrl()));
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-request-dictionaries.json")
+        void should_expose_dictionaries_and_properties(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(
+                1,
+                getRequestedFor(urlPathEqualTo("/foobar"))
+                    .withHeader("X-Dict-Keys", equalTo("0"))
+                    .withHeader("X-Props-Keys", equalTo("0"))
+                    .withHeader("X-Dict-Mutable", equalTo("false"))
+                    .withHeader("X-Props-Mutable", equalTo("false"))
+            );
+        }
+
+        @Test
         @DeployApi("/apis/v4/api-response-conditional.json")
         void should_handle_backend_error_response(HttpClient client) {
             wiremock.stubFor(get("/team").willReturn(aResponse().withStatus(502).withBody("Bad Gateway")));

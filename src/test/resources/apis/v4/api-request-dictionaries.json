@@ -1,0 +1,45 @@
+{
+    "id": "api-request-dictionaries",
+    "name": "api-request-dictionaries",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "proxy",
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [{ "path": "/test" }],
+            "entrypoints": [{ "type": "http-proxy" }]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "http-proxy",
+            "endpoints": [
+                {
+                    "name": "backend",
+                    "type": "http-proxy",
+                    "configuration": { "target": "http://localhost:8080/foobar" }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [{ "type": "http", "path": "/", "pathOperator": "STARTS_WITH" }],
+            "request": [
+                {
+                    "name": "JS",
+                    "enabled": true,
+                    "policy": "js",
+                    "configuration": {
+                        "script": "var dict = context.dictionaries(); var props = context.properties(); request.headers().set('X-Dict-Keys', Object.keys(dict).length.toString()); request.headers().set('X-Props-Keys', Object.keys(props).length.toString()); try { dict['injected'] = {'key': 'val'}; request.headers().set('X-Dict-Mutable', 'true'); } catch(e) { request.headers().set('X-Dict-Mutable', 'false'); } try { props['injected'] = 'val'; request.headers().set('X-Props-Mutable', 'true'); } catch(e) { request.headers().set('X-Props-Mutable', 'false'); }"
+                    }
+                }
+            ],
+            "response": []
+        }
+    ]
+}
