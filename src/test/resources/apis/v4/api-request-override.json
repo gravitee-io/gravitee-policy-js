@@ -1,0 +1,47 @@
+{
+    "id": "api-request-override",
+    "name": "api-request-override",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "proxy",
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [{ "path": "/test" }],
+            "entrypoints": [{ "type": "http-proxy" }]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "http-proxy",
+            "endpoints": [
+                {
+                    "name": "backend",
+                    "type": "http-proxy",
+                    "configuration": { "target": "http://localhost:8080/team" }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [{ "type": "http", "path": "/", "pathOperator": "STARTS_WITH" }],
+            "request": [
+                {
+                    "name": "JS",
+                    "enabled": true,
+                    "policy": "js",
+                    "configuration": {
+                        "readContent": true,
+                        "overrideContent": true,
+                        "script": "var body = JSON.parse(request.content());\nbody.message = 'Hello Universe!';\nrequest.headers().set('X-Phase', 'on-request');\nrequest.content(JSON.stringify(body));"
+                    }
+                }
+            ],
+            "response": []
+        }
+    ]
+}
