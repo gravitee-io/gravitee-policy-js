@@ -1,0 +1,47 @@
+{
+    "id": "api-request-multi-step",
+    "name": "api-request-multi-step",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "proxy",
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [{ "path": "/test" }],
+            "entrypoints": [{ "type": "http-proxy" }]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "http-proxy",
+            "endpoints": [
+                {
+                    "name": "backend",
+                    "type": "http-proxy",
+                    "configuration": { "target": "http://localhost:8080/team" }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [{ "type": "http", "path": "/", "pathOperator": "STARTS_WITH" }],
+            "request": [
+                {
+                    "name": "JS",
+                    "enabled": true,
+                    "policy": "js",
+                    "configuration": {
+                        "readContent": true,
+                        "overrideContent": true,
+                        "script": "var body = JSON.parse(request.content());\nvar env = request.parameter('env');\nif (env === 'staging') {\n    body.backend = 'staging';\n    request.headers().set('X-Backend', 'staging.internal');\n} else {\n    body.backend = 'production';\n    request.headers().set('X-Backend', 'prod.internal');\n}\nbody.method = request.method();\nbody.auth = btoa('user:pass');\ncontext.set('routed-to', body.backend);\nrequest.content(JSON.stringify(body));"
+                    }
+                }
+            ],
+            "response": []
+        }
+    ]
+}
