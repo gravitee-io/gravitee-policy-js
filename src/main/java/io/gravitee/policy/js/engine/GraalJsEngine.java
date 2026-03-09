@@ -15,12 +15,14 @@
  */
 package io.gravitee.policy.js.engine;
 
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.io.IOAccess;
+import org.slf4j.Logger;
 
 public class GraalJsEngine {
 
@@ -32,12 +34,30 @@ public class GraalJsEngine {
 
     private static final long SCRIPT_TIMEOUT_MS = 100;
 
+    private static final HostAccess HOST_ACCESS = HostAccess.newBuilder()
+        .allowAccessAnnotatedBy(HostAccess.Export.class)
+        .allowListAccess(true)
+        .allowMapAccess(true)
+        .build();
+
     public static void eval(String script) {
-        eval(script, SCRIPT_TIMEOUT_MS);
+        eval(script, SCRIPT_TIMEOUT_MS, null, null);
+    }
+
+    public static void eval(String script, Map<String, Object> bindings, Logger logger) {
+        eval(script, SCRIPT_TIMEOUT_MS, bindings, logger);
     }
 
     static void eval(String script, long timeoutMs) {
-        try (var context = createSandboxedContext()) {
+        eval(script, timeoutMs, null, null);
+    }
+
+    static void eval(String script, long timeoutMs, Map<String, Object> bindings, Logger logger) {
+        try (var context = createSandboxedContext(logger)) {
+            if (bindings != null) {
+                var jsBindings = context.getBindings("js");
+                bindings.forEach(jsBindings::putMember);
+            }
             var timeout = TIMEOUT_SCHEDULER.schedule(() -> context.close(true), timeoutMs, TimeUnit.MILLISECONDS);
             try {
                 context.eval("js", script);
@@ -47,14 +67,20 @@ public class GraalJsEngine {
         }
     }
 
-    private static Context createSandboxedContext() {
-        return Context.newBuilder("js")
-            .allowHostAccess(HostAccess.NONE)
+    private static Context createSandboxedContext(Logger logger) {
+        var builder = Context.newBuilder("js")
+            .allowHostAccess(HOST_ACCESS)
             .allowHostClassLookup(className -> false)
             .allowIO(IOAccess.NONE)
             .allowNativeAccess(false)
             .allowCreateThread(false)
-            .allowCreateProcess(false)
-            .build();
+            .allowCreateProcess(false);
+
+        if (logger != null) {
+            builder.out(new Slf4jOutputStream(logger));
+            builder.err(Slf4jOutputStream.error(logger));
+        }
+
+        return builder.build();
     }
 }
