@@ -281,6 +281,79 @@ public class JsPolicyIntegrationTest {
         }
 
         @Test
+        @DeployApi("/apis/v4/api-request-context-attrs.json")
+        void should_share_context_attributes_between_policies(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(
+                1,
+                getRequestedFor(urlPathEqualTo("/foobar"))
+                    .withHeader("X-My-Key", equalTo("my-value"))
+                    .withHeader("X-Other-Key", equalTo("other-value"))
+                    .withHeader("X-Removed", equalTo("null"))
+            );
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-request-content-base64.json")
+        void should_expose_content_as_base64(HttpClient client) {
+            wiremock.stubFor(post("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(POST, "/test")
+                .flatMap(request -> request.rxSend("hello"))
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(1, postRequestedFor(urlPathEqualTo("/foobar")).withHeader("X-Body-B64", equalTo("aGVsbG8=")));
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-response-status-override.json")
+        void should_override_response_status_and_reason(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(201))
+                .doOnSuccess(response -> assertThat(response.getHeader("X-Original-Status")).isEqualTo("200"))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-request-console-log.json")
+        void should_not_fail_when_using_console_log(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(1, getRequestedFor(urlPathEqualTo("/foobar")).withHeader("X-Logged", equalTo("true")));
+        }
+
+        @Test
         @DeployApi("/apis/v4/api-response-conditional.json")
         void should_handle_backend_error_response(HttpClient client) {
             wiremock.stubFor(get("/team").willReturn(aResponse().withStatus(502).withBody("Bad Gateway")));

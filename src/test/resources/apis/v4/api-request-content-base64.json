@@ -1,0 +1,47 @@
+{
+    "id": "api-request-content-base64",
+    "name": "api-request-content-base64",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "proxy",
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [{ "path": "/test" }],
+            "entrypoints": [{ "type": "http-proxy" }]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "http-proxy",
+            "endpoints": [
+                {
+                    "name": "backend",
+                    "type": "http-proxy",
+                    "configuration": { "target": "http://localhost:8080/foobar" }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [{ "type": "http", "path": "/", "pathOperator": "STARTS_WITH" }],
+            "request": [
+                {
+                    "name": "JS",
+                    "enabled": true,
+                    "policy": "js",
+                    "configuration": {
+                        "readContent": true,
+                        "overrideContent": false,
+                        "script": "request.headers().set('X-Body-B64', request.contentAsBase64());"
+                    }
+                }
+            ],
+            "response": []
+        }
+    ]
+}
