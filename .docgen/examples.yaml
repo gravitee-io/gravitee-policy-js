@@ -1,2 +1,37 @@
-genExamples: []
-rawExamples: []
+genExamples:
+    - templateRef: v4-api-proxy
+      language: json
+      properties:
+          phase: request
+
+rawExamples:
+    - title: Proxy API on Request phase
+      templateRef: v4-api-proxy
+      language: json
+      properties:
+          phase: request
+      file: .docgen/examples/set_request_header.json
+    - title: Proxy API on Response phase
+      templateRef: v4-api-proxy
+      language: json
+      properties:
+          phase: response
+      file: .docgen/examples/set_response_header.json
+    - title: Proxy API on Response phase - override content
+      templateRef: v4-api-proxy
+      language: json
+      properties:
+          phase: response
+      file: .docgen/examples/transform_response_content.json
+    - title: Message API CRD
+      templateRef: v4-api-crd-message
+      language: json
+      properties:
+          phase: request
+      file: .docgen/examples/set_message_header.json
+    - title: Message API CRD - override content
+      templateRef: v4-api-crd-message
+      language: json
+      properties:
+          phase: request
+      file: .docgen/examples/transform_message_content.json
