@@ -1,0 +1,5 @@
+{
+    "readContent": true,
+    "overrideContent": true,
+    "script": "response.content(response.content() + ' appended by JS policy');"
+}

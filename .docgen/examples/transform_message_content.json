@@ -1,0 +1,5 @@
+{
+    "readContent": true,
+    "overrideContent": true,
+    "script": "message.content(message.content() + ' appended by JS policy');"
+}

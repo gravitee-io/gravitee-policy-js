@@ -1,13 +1,3 @@
-## Overview
-This policy lets you execute custom JavaScript scripts at any stage of request or response processing through the Gravitee gateway. It is powered by GraalJS, providing full ES6+ support, secure sandboxed execution, and modern JavaScript engine capabilities.
-
-It replaces the legacy Nashorn-based `gravitee-policy-javascript` policy, which has been deprecated due to Nashorn's removal from recent JDKs. This is a new policy built from scratch — not a migration — and existing scripts may require adjustments.
-
-> **Note:** This policy supports V4 APIs only (Proxy and Message). V2 APIs are not supported.
-
-
-
-## Usage
 ## JavaScript engine
 
 Scripts run on [GraalJS](https://www.graalvm.org/javascript/) with **ECMAScript 2023** (ES14) support. You can use modern syntax: `let`/`const`, arrow functions, template literals, destructuring, optional chaining (`?.`), nullish coalescing (`??`), and more.
@@ -334,16 +324,3 @@ var content = JSON.parse(response.content());
 content.modified = true;
 response.content(JSON.stringify(content));
 ```
-
-
-
-
-## Errors
-These templates are defined at the API level, in the "Entrypoint" section for v4 APIs, or in "Response Templates" for v2 APIs.
-The error keys sent by this policy are as follows:
-
-| Key| Parameters |
-| --- | ---  |
-| JS_EXECUTION_FAILURE| Interrupted with a 500 status. Occurs when the JavaScript script throws an error or exceeds the execution timeout. |
-
-

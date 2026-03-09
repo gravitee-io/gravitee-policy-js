@@ -18,6 +18,7 @@
             "title": "Script",
             "description": "JavaScript script to evaluate.",
             "type": "string",
+            "default": "request.headers().set('X-Custom', 'value');",
             "format": "gio-code-editor",
             "x-schema-form": {
                 "type": "codemirror",
