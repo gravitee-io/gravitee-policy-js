@@ -1,6 +1,6 @@
 
 <!-- GENERATED CODE - DO NOT ALTER THIS OR THE FOLLOWING LINES -->
-# JavaScript (GraalJS)
+# JavaScript (New)
 
 [![Gravitee.io](https://img.shields.io/static/v1?label=Available%20at&message=Gravitee.io&color=1EC9D2)](https://download.gravitee.io/#graviteeio-apim/plugins/policies/gravitee-policy-js/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gravitee-io/gravitee-policy-js/blob/master/LICENSE.txt)
@@ -8,7 +8,7 @@
 [![CircleCI](https://circleci.com/gh/gravitee-io/gravitee-policy-js.svg?style=svg)](https://circleci.com/gh/gravitee-io/gravitee-policy-js)
 
 ## Overview
-This policy lets you execute custom JavaScript scripts at any stage of request or response processing through the Gravitee gateway. It is powered by GraalJS, providing full ES6+ support, secure sandboxed execution, and modern JavaScript engine capabilities.
+This policy lets you execute custom JavaScript scripts at any stage of request or response processing through the Gravitee gateway, with full ES6+ support, secure sandboxed execution, and modern JavaScript engine capabilities.
 
 It replaces the legacy Nashorn-based `gravitee-policy-javascript` policy, which has been deprecated due to Nashorn's removal from recent JDKs. This is a new policy built from scratch — not a migration — and existing scripts may require adjustments.
 
@@ -19,7 +19,7 @@ It replaces the legacy Nashorn-based `gravitee-policy-javascript` policy, which 
 ## Usage
 ## JavaScript engine
 
-Scripts run on [GraalJS](https://www.graalvm.org/javascript/) with **ECMAScript 2023** (ES14) support. You can use modern syntax: `let`/`const`, arrow functions, template literals, destructuring, optional chaining (`?.`), nullish coalescing (`??`), and more.
+Scripts run with **ECMAScript 2023** (ES14) support. You can use modern syntax: `let`/`const`, arrow functions, template literals, destructuring, optional chaining (`?.`), nullish coalescing (`??`), and more.
 
 Each execution runs in a **sandboxed context** with a **100ms timeout**. The sandbox enforces strict isolation:
 
@@ -315,7 +315,7 @@ Applicable to `request.headers()`, `response.headers()`, `response.trailers()`, 
 
 ## Migrating from the legacy JavaScript policy
 
-The new JS policy uses GraalJS instead of Nashorn. Key differences:
+Key differences with the legacy policy:
 
 | Aspect                    | Legacy (`javascript`)      | New (`js`)                                                   |
 |---------------------------|----------------------------|--------------------------------------------------------------|
@@ -400,7 +400,7 @@ Strikethrough text indicates that a version is deprecated.
   "api": {
     "definitionVersion": "V4",
     "type": "PROXY",
-    "name": "JavaScript (GraalJS) example API",
+    "name": "JavaScript (New) example API",
     "flows": [
       {
         "name": "Common Flow",
@@ -414,7 +414,7 @@ Strikethrough text indicates that a version is deprecated.
         ],
         "request": [
           {
-            "name": "JavaScript (GraalJS)",
+            "name": "JavaScript (New)",
             "enabled": true,
             "policy": "js",
             "configuration":
@@ -438,7 +438,7 @@ Strikethrough text indicates that a version is deprecated.
   "api": {
     "definitionVersion": "V4",
     "type": "PROXY",
-    "name": "JavaScript (GraalJS) example API",
+    "name": "JavaScript (New) example API",
     "flows": [
       {
         "name": "Common Flow",
@@ -452,7 +452,7 @@ Strikethrough text indicates that a version is deprecated.
         ],
         "request": [
           {
-            "name": "JavaScript (GraalJS)",
+            "name": "JavaScript (New)",
             "enabled": true,
             "policy": "js",
             "configuration":
@@ -475,7 +475,7 @@ Strikethrough text indicates that a version is deprecated.
   "api": {
     "definitionVersion": "V4",
     "type": "PROXY",
-    "name": "JavaScript (GraalJS) example API",
+    "name": "JavaScript (New) example API",
     "flows": [
       {
         "name": "Common Flow",
@@ -489,7 +489,7 @@ Strikethrough text indicates that a version is deprecated.
         ],
         "response": [
           {
-            "name": "JavaScript (GraalJS)",
+            "name": "JavaScript (New)",
             "enabled": true,
             "policy": "js",
             "configuration":
@@ -512,7 +512,7 @@ Strikethrough text indicates that a version is deprecated.
   "api": {
     "definitionVersion": "V4",
     "type": "PROXY",
-    "name": "JavaScript (GraalJS) example API",
+    "name": "JavaScript (New) example API",
     "flows": [
       {
         "name": "Common Flow",
@@ -526,7 +526,7 @@ Strikethrough text indicates that a version is deprecated.
         ],
         "response": [
           {
-            "name": "JavaScript (GraalJS)",
+            "name": "JavaScript (New)",
             "enabled": true,
             "policy": "js",
             "configuration":
@@ -550,7 +550,7 @@ kind: "ApiV4Definition"
 metadata:
     name: "js-message-api-crd"
 spec:
-    name: "JavaScript (GraalJS) example"
+    name: "JavaScript (New) example"
     type: "MESSAGE"
     flows:
       - name: "Common Flow"
@@ -559,7 +559,7 @@ spec:
             matchRequired: false
             mode: "DEFAULT"
         request:
-          - name: "JavaScript (GraalJS)"
+          - name: "JavaScript (New)"
             enabled: true
             policy: "js"
             configuration:
@@ -575,7 +575,7 @@ kind: "ApiV4Definition"
 metadata:
     name: "js-message-api-crd"
 spec:
-    name: "JavaScript (GraalJS) example"
+    name: "JavaScript (New) example"
     type: "MESSAGE"
     flows:
       - name: "Common Flow"
@@ -584,7 +584,7 @@ spec:
             matchRequired: false
             mode: "DEFAULT"
         request:
-          - name: "JavaScript (GraalJS)"
+          - name: "JavaScript (New)"
             enabled: true
             policy: "js"
             configuration:

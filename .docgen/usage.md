@@ -1,6 +1,6 @@
 ## JavaScript engine
 
-Scripts run on [GraalJS](https://www.graalvm.org/javascript/) with **ECMAScript 2023** (ES14) support. You can use modern syntax: `let`/`const`, arrow functions, template literals, destructuring, optional chaining (`?.`), nullish coalescing (`??`), and more.
+Scripts run with **ECMAScript 2023** (ES14) support. You can use modern syntax: `let`/`const`, arrow functions, template literals, destructuring, optional chaining (`?.`), nullish coalescing (`??`), and more.
 
 Each execution runs in a **sandboxed context** with a **100ms timeout**. The sandbox enforces strict isolation:
 
@@ -296,7 +296,7 @@ Applicable to `request.headers()`, `response.headers()`, `response.trailers()`, 
 
 ## Migrating from the legacy JavaScript policy
 
-The new JS policy uses GraalJS instead of Nashorn. Key differences:
+Key differences with the legacy policy:
 
 | Aspect                    | Legacy (`javascript`)      | New (`js`)                                                   |
 |---------------------------|----------------------------|--------------------------------------------------------------|

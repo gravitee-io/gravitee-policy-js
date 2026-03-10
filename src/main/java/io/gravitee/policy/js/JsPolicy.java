@@ -18,6 +18,7 @@ package io.gravitee.policy.js;
 import static io.gravitee.common.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 
 import io.gravitee.gateway.api.buffer.Buffer;
+import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.reactive.api.ExecutionFailure;
 import io.gravitee.gateway.reactive.api.context.base.BaseExecutionContext;
 import io.gravitee.gateway.reactive.api.context.http.HttpBaseExecutionContext;
@@ -57,12 +58,12 @@ public class JsPolicy implements HttpPolicy {
 
     @Override
     public Completable onRequest(HttpPlainExecutionContext ctx) {
-        return execute(ctx, true);
+        return execute(ctx, Phase.REQUEST);
     }
 
     @Override
     public Completable onResponse(HttpPlainExecutionContext ctx) {
-        return execute(ctx, false);
+        return execute(ctx, Phase.RESPONSE);
     }
 
     @Override
@@ -75,13 +76,13 @@ public class JsPolicy implements HttpPolicy {
         return ctx.response().onMessage(message -> runMessageScript(ctx, message));
     }
 
-    private Completable execute(HttpPlainExecutionContext ctx, boolean requestPhase) {
+    private Completable execute(HttpPlainExecutionContext ctx, Phase phase) {
         String script = configuration.getScript();
         if (script == null || script.isBlank()) {
             return Completable.complete();
         }
         if (configuration.isReadContent()) {
-            return executeWithBody(ctx, script, requestPhase);
+            return executeWithBody(ctx, script, phase);
         }
         return executeWithoutBody(ctx, script);
     }
@@ -96,19 +97,20 @@ public class JsPolicy implements HttpPolicy {
             .andThen(Completable.defer(() -> checkResult(ctx, result)));
     }
 
-    private Completable executeWithBody(HttpPlainExecutionContext ctx, String script, boolean requestPhase) {
+    private Completable executeWithBody(HttpPlainExecutionContext ctx, String script, Phase phase) {
         var result = new JsPolicyResult();
         var jsRequest = new JsRequest(ctx.request());
         var jsResponse = new JsResponse(ctx.response());
         var bindings = buildBindings(ctx, result, jsRequest, jsResponse);
         var logger = ctx.withLogger(log);
         boolean override = configuration.isOverrideContent();
+        boolean isRequest = phase == Phase.REQUEST;
 
         MaybeTransformer<Buffer, Buffer> transformer = upstream ->
             upstream
                 .defaultIfEmpty(Buffer.buffer())
                 .flatMapMaybe(body -> {
-                    if (requestPhase) {
+                    if (isRequest) {
                         jsRequest.content(body.toString());
                     } else {
                         jsResponse.content(body.toString());
@@ -118,20 +120,16 @@ public class JsPolicy implements HttpPolicy {
                         .onErrorResumeNext(e -> ctx.interruptBodyWith(toFailure(ctx, e)).ignoreElement())
                         .andThen(Completable.defer(() -> checkResult(ctx, result)))
                         .andThen(
-                            Maybe.defer(() -> {
-                                if (override) {
-                                    String newContent = requestPhase ? jsRequest.content() : jsResponse.content();
-                                    Buffer newBuffer = Buffer.buffer(newContent != null ? newContent : "");
-                                    var headers = requestPhase ? ctx.request().headers() : ctx.response().headers();
-                                    headers.set("Content-Length", String.valueOf(newBuffer.length()));
-                                    return Maybe.just(newBuffer);
-                                }
-                                return Maybe.just(body);
+                            Maybe.fromCallable(() -> {
+                                if (!override) return body;
+                                String content = isRequest ? jsRequest.content() : jsResponse.content();
+                                var headers = isRequest ? ctx.request().headers() : ctx.response().headers();
+                                return replaceBody(content, headers);
                             })
                         );
                 });
 
-        if (requestPhase) {
+        if (isRequest) {
             return ctx.request().onBody(transformer);
         } else {
             return ctx.response().onBody(transformer);
@@ -197,6 +195,17 @@ public class JsPolicy implements HttpPolicy {
         var bindings = buildBindings(ctx, result);
         bindings.put("message", new JsMessage(message));
         return bindings;
+    }
+
+    private static Buffer replaceBody(String content, HttpHeaders headers) {
+        Buffer buffer = Buffer.buffer(content != null ? content : "");
+        headers.set("Content-Length", String.valueOf(buffer.length()));
+        return buffer;
+    }
+
+    enum Phase {
+        REQUEST,
+        RESPONSE,
     }
 
     private ExecutionFailure toFailure(BaseExecutionContext ctx, Throwable e) {
