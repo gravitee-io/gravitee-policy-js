@@ -23,11 +23,13 @@ public class JsBase64 {
 
     @HostAccess.Export
     public String encode(String input) {
+        if (input == null) throw new IllegalArgumentException("encode requires a string argument");
         return Base64.getEncoder().encodeToString(input.getBytes(StandardCharsets.UTF_8));
     }
 
     @HostAccess.Export
     public String decode(String input) {
+        if (input == null) throw new IllegalArgumentException("decode requires a string argument");
         return new String(Base64.getDecoder().decode(input), StandardCharsets.UTF_8);
     }
 }
