@@ -119,23 +119,29 @@ public class JsRequest {
 
     @HostAccess.Export
     public Map<String, List<String>> parameters() {
-        return Map.copyOf(request.parameters());
+        var params = request.parameters();
+        return params != null ? Map.copyOf(params) : Map.of();
     }
 
     @HostAccess.Export
     public String parameter(String name) {
-        var values = request.parameters().get(name);
+        var params = request.parameters();
+        if (params == null) return null;
+        var values = params.get(name);
         return (values != null && !values.isEmpty()) ? values.get(0) : null;
     }
 
     @HostAccess.Export
     public Map<String, List<String>> pathParameters() {
-        return Map.copyOf(request.pathParameters());
+        var params = request.pathParameters();
+        return params != null ? Map.copyOf(params) : Map.of();
     }
 
     @HostAccess.Export
     public String pathParameter(String name) {
-        var values = request.pathParameters().get(name);
+        var params = request.pathParameters();
+        if (params == null) return null;
+        var values = params.get(name);
         return (values != null && !values.isEmpty()) ? values.get(0) : null;
     }
 

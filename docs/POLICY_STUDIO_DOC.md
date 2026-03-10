@@ -1,5 +1,5 @@
 ## Overview
-This policy lets you execute custom JavaScript scripts at any stage of request or response processing through the Gravitee gateway. It is powered by GraalJS, providing full ES6+ support, secure sandboxed execution, and modern JavaScript engine capabilities.
+This policy lets you execute custom JavaScript scripts at any stage of request or response processing through the Gravitee gateway, with full ES6+ support, secure sandboxed execution, and modern JavaScript engine capabilities.
 
 It replaces the legacy Nashorn-based `gravitee-policy-javascript` policy, which has been deprecated due to Nashorn's removal from recent JDKs. This is a new policy built from scratch — not a migration — and existing scripts may require adjustments.
 
@@ -10,7 +10,7 @@ It replaces the legacy Nashorn-based `gravitee-policy-javascript` policy, which 
 ## Usage
 ## JavaScript engine
 
-Scripts run on [GraalJS](https://www.graalvm.org/javascript/) with **ECMAScript 2023** (ES14) support. You can use modern syntax: `let`/`const`, arrow functions, template literals, destructuring, optional chaining (`?.`), nullish coalescing (`??`), and more.
+Scripts run with **ECMAScript 2023** (ES14) support. You can use modern syntax: `let`/`const`, arrow functions, template literals, destructuring, optional chaining (`?.`), nullish coalescing (`??`), and more.
 
 Each execution runs in a **sandboxed context** with a **100ms timeout**. The sandbox enforces strict isolation:
 
@@ -306,7 +306,7 @@ Applicable to `request.headers()`, `response.headers()`, `response.trailers()`, 
 
 ## Migrating from the legacy JavaScript policy
 
-The new JS policy uses GraalJS instead of Nashorn. Key differences:
+Key differences with the legacy policy:
 
 | Aspect                    | Legacy (`javascript`)      | New (`js`)                                                   |
 |---------------------------|----------------------------|--------------------------------------------------------------|

@@ -40,10 +40,6 @@ public class GraalJsEngine {
         .allowMapAccess(true)
         .build();
 
-    public static void eval(String script) {
-        eval(script, SCRIPT_TIMEOUT_MS, null, null);
-    }
-
     public static void eval(String script, Map<String, Object> bindings, Logger logger) {
         eval(script, SCRIPT_TIMEOUT_MS, bindings, logger);
     }
