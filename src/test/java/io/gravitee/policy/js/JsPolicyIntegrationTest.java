@@ -419,6 +419,68 @@ public class JsPolicyIntegrationTest {
         }
 
         @Test
+        @DeployApi("/apis/v4/api-request-properties.json")
+        void should_expose_request_properties(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(
+                1,
+                getRequestedFor(urlPathEqualTo("/foobar"))
+                    .withHeader("X-Id", matching(".+"))
+                    .withHeader("X-Path", matching("/test.*"))
+                    .withHeader("X-ContextPath", matching("/test.*"))
+                    .withHeader("X-Method", equalTo("GET"))
+                    .withHeader("X-Scheme", matching("https?"))
+                    .withHeader("X-Host", matching(".+"))
+                    .withHeader("X-Timestamp", matching("\\d+"))
+                    .withHeader("X-Version", matching(".+"))
+            );
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-request-fail-content-type.json")
+        void should_interrupt_with_result_fail_and_content_type(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(403))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(0, anyRequestedFor(anyUrl()));
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-request-atob-null.json")
+        void should_return_500_on_atob_null(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(500))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(0, anyRequestedFor(anyUrl()));
+        }
+
+        @Test
         @DeployApi("/apis/v4/api-request-btoa-null.json")
         void should_return_500_on_btoa_null(HttpClient client) {
             wiremock.stubFor(get("/foobar").willReturn(ok("")));
