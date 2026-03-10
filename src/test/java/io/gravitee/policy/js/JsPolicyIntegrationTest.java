@@ -368,6 +368,74 @@ public class JsPolicyIntegrationTest {
         }
 
         @Test
+        @DeployApi("/apis/v4/api-request-timeout.json")
+        void should_return_500_on_infinite_loop_timeout(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(500))
+                .test()
+                .awaitDone(10, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(0, anyRequestedFor(anyUrl()));
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-request-empty-script.json")
+        void should_pass_through_with_empty_script(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(1, getRequestedFor(urlPathEqualTo("/foobar")));
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-request-atob.json")
+        void should_decode_base64_with_atob(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(1, getRequestedFor(urlPathEqualTo("/foobar")).withHeader("X-Decoded", equalTo("Hello World")));
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-request-btoa-null.json")
+        void should_return_500_on_btoa_null(HttpClient client) {
+            wiremock.stubFor(get("/foobar").willReturn(ok("")));
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(500))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(0, anyRequestedFor(anyUrl()));
+        }
+
+        @Test
         @DeployApi("/apis/v4/api-response-conditional.json")
         void should_handle_backend_error_response(HttpClient client) {
             wiremock.stubFor(get("/team").willReturn(aResponse().withStatus(502).withBody("Bad Gateway")));

@@ -1,0 +1,45 @@
+{
+    "id": "api-request-btoa-null",
+    "name": "api-request-btoa-null",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "proxy",
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [{ "path": "/test" }],
+            "entrypoints": [{ "type": "http-proxy" }]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "http-proxy",
+            "endpoints": [
+                {
+                    "name": "backend",
+                    "type": "http-proxy",
+                    "configuration": { "target": "http://localhost:8080/foobar" }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [{ "type": "http", "path": "/", "pathOperator": "STARTS_WITH" }],
+            "request": [
+                {
+                    "name": "JS",
+                    "enabled": true,
+                    "policy": "js",
+                    "configuration": {
+                        "script": "btoa(null);"
+                    }
+                }
+            ],
+            "response": []
+        }
+    ]
+}

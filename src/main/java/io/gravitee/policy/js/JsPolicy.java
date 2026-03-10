@@ -191,8 +191,20 @@ public class JsPolicy implements HttpPolicy {
         bindings.put("result", result);
         bindings.put("State", Map.of("SUCCESS", JsPolicyResult.State.SUCCESS, "FAILURE", JsPolicyResult.State.FAILURE));
         bindings.put("Base64", BASE64);
-        bindings.put("atob", (ProxyExecutable) args -> BASE64.decode(args[0].asString()));
-        bindings.put("btoa", (ProxyExecutable) args -> BASE64.encode(args[0].asString()));
+        bindings.put(
+            "atob",
+            (ProxyExecutable) args -> {
+                if (args.length == 0 || args[0].isNull()) throw new IllegalArgumentException("atob requires a string argument");
+                return BASE64.decode(args[0].asString());
+            }
+        );
+        bindings.put(
+            "btoa",
+            (ProxyExecutable) args -> {
+                if (args.length == 0 || args[0].isNull()) throw new IllegalArgumentException("btoa requires a string argument");
+                return BASE64.encode(args[0].asString());
+            }
+        );
         return bindings;
     }
 
