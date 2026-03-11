@@ -597,6 +597,18 @@ spec:
 
 ## Changelog
 
+### [1.0.0-alpha.2](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.1...1.0.0-alpha.2) (2026-03-11)
+
+
+##### Bug Fixes
+
+* address PR review feedback ([c499b3c](https://github.com/gravitee-io/gravitee-policy-js/commit/c499b3c02d622e1bd31d40237f7ff4cd2b7dde83))
+
+
+##### Features
+
+* add JS bindings and context API ([e227e26](https://github.com/gravitee-io/gravitee-policy-js/commit/e227e263b45b66a4ff0a2f780d571b88d87bbb61))
+
 ### 1.0.0-alpha.1 (2026-03-05)
 
 
