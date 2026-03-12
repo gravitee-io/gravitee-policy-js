@@ -77,8 +77,19 @@ class GraalJsEngineTest {
             Arguments.of("Java.type('java.io.File')", "Java.type File"),
             Arguments.of("java.lang.Runtime.getRuntime().exec('ls')", "Runtime.exec"),
             Arguments.of("new java.lang.ProcessBuilder(['ls'])", "ProcessBuilder"),
-            Arguments.of("Polyglot.eval('java', '1+1')", "Polyglot.eval")
+            Arguments.of("Polyglot.eval('java', '1+1')", "Polyglot.eval"),
+            Arguments.of("Java.type('java.net.URL')", "URL network access"),
+            Arguments.of("Java.type('java.net.Socket')", "Socket network access"),
+            Arguments.of("Java.type('java.lang.Class').forName('java.lang.System')", "Reflection"),
+            Arguments.of("Java.type('java.lang.ClassLoader')", "ClassLoader"),
+            Arguments.of("Java.type('java.lang.System').getenv()", "Environment variables"),
+            Arguments.of("Java.type('java.lang.Thread').sleep(1000)", "Thread manipulation")
         );
+    }
+
+    @Test
+    void should_block_stack_overflow() {
+        assertThatThrownBy(() -> GraalJsEngine.eval("function f() { f(); } f();", 500)).isInstanceOf(PolyglotException.class);
     }
 
     @ParameterizedTest(name = "should block: {1}")
