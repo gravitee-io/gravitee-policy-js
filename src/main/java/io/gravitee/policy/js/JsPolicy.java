@@ -26,6 +26,7 @@ import io.gravitee.gateway.reactive.api.context.http.HttpMessageExecutionContext
 import io.gravitee.gateway.reactive.api.context.http.HttpPlainExecutionContext;
 import io.gravitee.gateway.reactive.api.message.Message;
 import io.gravitee.gateway.reactive.api.policy.http.HttpPolicy;
+import io.gravitee.node.api.configuration.Configuration;
 import io.gravitee.node.logging.NodeLoggerFactory;
 import io.gravitee.policy.js.bindings.JsBase64;
 import io.gravitee.policy.js.bindings.JsContext;
@@ -48,6 +49,9 @@ public class JsPolicy implements HttpPolicy {
 
     private static final Logger log = NodeLoggerFactory.getLogger(JsPolicy.class);
     private static final String ERROR_KEY = "JS_EXECUTION_FAILURE";
+    private static final String TIMEOUT_PROPERTY = "policy.js.timeout";
+    private static final long MIN_TIMEOUT_MS = 10;
+    private static final long MAX_TIMEOUT_MS = 10_000;
     private static final JsBase64 BASE64 = new JsBase64();
 
     private final JsPolicyConfiguration configuration;
@@ -96,7 +100,8 @@ public class JsPolicy implements HttpPolicy {
         var result = new JsPolicyResult();
         var bindings = buildBindings(ctx, result);
         var logger = ctx.withLogger(log);
-        return Completable.fromAction(() -> GraalJsEngine.eval(script, bindings, logger))
+        long timeoutMs = resolveTimeout(ctx);
+        return Completable.fromAction(() -> GraalJsEngine.eval(script, timeoutMs, bindings, logger))
             .subscribeOn(Schedulers.io())
             .onErrorResumeNext(e -> ctx.interruptWith(toFailure(ctx, e)))
             .andThen(Completable.defer(() -> checkResult(ctx, result)));
@@ -120,7 +125,7 @@ public class JsPolicy implements HttpPolicy {
                     } else {
                         jsResponse.content(body.toString());
                     }
-                    return Completable.fromAction(() -> GraalJsEngine.eval(script, bindings, logger))
+                    return Completable.fromAction(() -> GraalJsEngine.eval(script, resolveTimeout(ctx), bindings, logger))
                         .subscribeOn(Schedulers.io())
                         .onErrorResumeNext(e -> ctx.interruptBodyWith(toFailure(ctx, e)).ignoreElement())
                         .andThen(Completable.defer(() -> checkResult(ctx, result)))
@@ -149,7 +154,8 @@ public class JsPolicy implements HttpPolicy {
         var result = new JsPolicyResult();
         var bindings = buildMessageBindings(ctx, message, result);
         var logger = ctx.withLogger(log);
-        return Completable.fromAction(() -> GraalJsEngine.eval(script, bindings, logger))
+        long timeoutMs = resolveTimeout(ctx);
+        return Completable.fromAction(() -> GraalJsEngine.eval(script, timeoutMs, bindings, logger))
             .subscribeOn(Schedulers.io())
             .onErrorResumeNext(e -> ctx.interruptMessageWith(toFailure(ctx, e)).ignoreElement())
             .andThen(Completable.defer(() -> checkResult(ctx, result)))
@@ -223,6 +229,15 @@ public class JsPolicy implements HttpPolicy {
     enum Phase {
         REQUEST,
         RESPONSE,
+    }
+
+    private long resolveTimeout(HttpBaseExecutionContext ctx) {
+        Configuration config = ctx.getComponent(Configuration.class);
+        if (config == null) {
+            return GraalJsEngine.DEFAULT_TIMEOUT_MS;
+        }
+        long timeout = config.getProperty(TIMEOUT_PROPERTY, Long.class, GraalJsEngine.DEFAULT_TIMEOUT_MS);
+        return Math.max(MIN_TIMEOUT_MS, Math.min(timeout, MAX_TIMEOUT_MS));
     }
 
     private ExecutionFailure toFailure(BaseExecutionContext ctx, Throwable e) {
