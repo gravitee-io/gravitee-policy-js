@@ -32,7 +32,7 @@ public class GraalJsEngine {
         return t;
     });
 
-    private static final long SCRIPT_TIMEOUT_MS = 100;
+    public static final long DEFAULT_TIMEOUT_MS = 100;
 
     private static final HostAccess HOST_ACCESS = HostAccess.newBuilder()
         .allowAccessAnnotatedBy(HostAccess.Export.class)
@@ -41,14 +41,14 @@ public class GraalJsEngine {
         .build();
 
     public static void eval(String script, Map<String, Object> bindings, Logger logger) {
-        eval(script, SCRIPT_TIMEOUT_MS, bindings, logger);
+        eval(script, DEFAULT_TIMEOUT_MS, bindings, logger);
     }
 
     static void eval(String script, long timeoutMs) {
         eval(script, timeoutMs, null, null);
     }
 
-    static void eval(String script, long timeoutMs, Map<String, Object> bindings, Logger logger) {
+    public static void eval(String script, long timeoutMs, Map<String, Object> bindings, Logger logger) {
         try (var context = createSandboxedContext(logger)) {
             if (bindings != null) {
                 var jsBindings = context.getBindings("js");
