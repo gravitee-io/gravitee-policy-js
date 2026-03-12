@@ -27,7 +27,12 @@ import io.gravitee.gateway.reactive.api.context.http.HttpPlainExecutionContext;
 import io.gravitee.gateway.reactive.api.message.Message;
 import io.gravitee.gateway.reactive.api.policy.http.HttpPolicy;
 import io.gravitee.node.logging.NodeLoggerFactory;
-import io.gravitee.policy.js.bindings.*;
+import io.gravitee.policy.js.bindings.JsBase64;
+import io.gravitee.policy.js.bindings.JsContext;
+import io.gravitee.policy.js.bindings.JsMessage;
+import io.gravitee.policy.js.bindings.JsPolicyResult;
+import io.gravitee.policy.js.bindings.JsRequest;
+import io.gravitee.policy.js.bindings.JsResponse;
 import io.gravitee.policy.js.engine.GraalJsEngine;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -186,8 +191,20 @@ public class JsPolicy implements HttpPolicy {
         bindings.put("result", result);
         bindings.put("State", Map.of("SUCCESS", JsPolicyResult.State.SUCCESS, "FAILURE", JsPolicyResult.State.FAILURE));
         bindings.put("Base64", BASE64);
-        bindings.put("atob", (ProxyExecutable) args -> BASE64.decode(args[0].asString()));
-        bindings.put("btoa", (ProxyExecutable) args -> BASE64.encode(args[0].asString()));
+        bindings.put(
+            "atob",
+            (ProxyExecutable) args -> {
+                if (args.length == 0 || args[0].isNull()) throw new IllegalArgumentException("atob requires a string argument");
+                return BASE64.decode(args[0].asString());
+            }
+        );
+        bindings.put(
+            "btoa",
+            (ProxyExecutable) args -> {
+                if (args.length == 0 || args[0].isNull()) throw new IllegalArgumentException("btoa requires a string argument");
+                return BASE64.encode(args[0].asString());
+            }
+        );
         return bindings;
     }
 

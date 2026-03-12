@@ -26,6 +26,7 @@ public class JsRequest {
 
     private final HttpBaseRequest request;
     private final JsHeaders headers;
+    private String content;
 
     public JsRequest(HttpBaseRequest request) {
         this.request = request;
@@ -144,8 +145,6 @@ public class JsRequest {
         var values = params.get(name);
         return (values != null && !values.isEmpty()) ? values.get(0) : null;
     }
-
-    private String content;
 
     @HostAccess.Export
     public String content() {
