@@ -30,6 +30,8 @@ Each execution runs in a **sandboxed context** with a **100ms timeout**. The san
 
 `console.log()` and `console.error()` are available and routed to the gateway logs (SLF4J).
 
+> **Security note:** Scripts have read access to all context attributes, dictionaries, and properties available at execution time. If sensitive data (API keys, tokens, internal identifiers) is present in the execution context, it will be accessible to the script. Make sure your scripts are reviewed and trusted before deployment, especially when using context attributes from upstream policies.
+
 ---
 
 ## Change the outcome
