@@ -34,7 +34,7 @@
     </parent>
 
     <properties>
-        <gravitee-apim.version>4.10.7</gravitee-apim.version>
+        <gravitee-apim.version>4.10.8</gravitee-apim.version>
         <gravitee-gateway-api.version>5.0.0-alpha.2</gravitee-gateway-api.version>
         <gravitee-node.version>8.0.0-alpha.10</gravitee-node.version>
         <graalvm.version>23.1.10</graalvm.version>
