@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.policy</groupId>
     <artifactId>gravitee-policy-js</artifactId>
-    <version>1.0.0-alpha.3</version>
+    <version>1.0.0-alpha.4</version>
 
     <name>Gravitee.io APIM - Policy - JS</name>
     <description>Execute JavaScript scripts at any stage of request or message processing through the gateway</description>

@@ -1,3 +1,10 @@
+# [1.0.0-alpha.4](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.3...1.0.0-alpha.4) (2026-03-16)
+
+
+### Features
+
+* add configurable script timeout via gravitee.yml ([240fde3](https://github.com/gravitee-io/gravitee-policy-js/commit/240fde3da1a01cce2e1cb7b9888950e9aee32861))
+
 # [1.0.0-alpha.3](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.2...1.0.0-alpha.3) (2026-03-16)
 
 
