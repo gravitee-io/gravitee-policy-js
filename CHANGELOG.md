@@ -1,3 +1,10 @@
+# [1.0.0-alpha.3](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.2...1.0.0-alpha.3) (2026-03-16)
+
+
+### Bug Fixes
+
+* add null guards on atob/btoa with integration tests ([bb7e80c](https://github.com/gravitee-io/gravitee-policy-js/commit/bb7e80c9cfb95b804366b259af0e3a1cabc0f61d))
+
 # [1.0.0-alpha.2](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.1...1.0.0-alpha.2) (2026-03-11)
 
 
