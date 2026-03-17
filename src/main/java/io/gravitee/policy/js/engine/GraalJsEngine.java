@@ -15,6 +15,7 @@
  */
 package io.gravitee.policy.js.engine;
 
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -75,6 +76,9 @@ public class GraalJsEngine {
         if (logger != null) {
             builder.out(new Slf4jOutputStream(logger));
             builder.err(Slf4jOutputStream.error(logger));
+        } else {
+            builder.out(OutputStream.nullOutputStream());
+            builder.err(OutputStream.nullOutputStream());
         }
 
         return builder.build();
