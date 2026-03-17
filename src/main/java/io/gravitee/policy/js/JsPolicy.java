@@ -50,6 +50,7 @@ public class JsPolicy implements HttpPolicy {
     private static final Logger log = NodeLoggerFactory.getLogger(JsPolicy.class);
     private static final String ERROR_KEY = "JS_EXECUTION_FAILURE";
     private static final String TIMEOUT_PROPERTY = "policy.js.timeout";
+    private static final String CONSOLE_PROPERTY = "policy.js.console";
     private static final long MIN_TIMEOUT_MS = 10;
     private static final long MAX_TIMEOUT_MS = 10_000;
     private static final JsBase64 BASE64 = new JsBase64();
@@ -99,7 +100,7 @@ public class JsPolicy implements HttpPolicy {
     private Completable executeWithoutBody(HttpPlainExecutionContext ctx, String script) {
         var result = new JsPolicyResult();
         var bindings = buildBindings(ctx, result);
-        var logger = ctx.withLogger(log);
+        var logger = isConsoleEnabled(ctx) ? ctx.withLogger(log) : null;
         long timeoutMs = resolveTimeout(ctx);
         return Completable.fromAction(() -> GraalJsEngine.eval(script, timeoutMs, bindings, logger))
             .subscribeOn(Schedulers.io())
@@ -112,7 +113,7 @@ public class JsPolicy implements HttpPolicy {
         var jsRequest = new JsRequest(ctx.request());
         var jsResponse = new JsResponse(ctx.response());
         var bindings = buildBindings(ctx, result, jsRequest, jsResponse);
-        var logger = ctx.withLogger(log);
+        var logger = isConsoleEnabled(ctx) ? ctx.withLogger(log) : null;
         boolean override = configuration.isOverrideContent();
         boolean isRequest = phase == Phase.REQUEST;
 
@@ -153,7 +154,7 @@ public class JsPolicy implements HttpPolicy {
         }
         var result = new JsPolicyResult();
         var bindings = buildMessageBindings(ctx, message, result);
-        var logger = ctx.withLogger(log);
+        var logger = isConsoleEnabled(ctx) ? ctx.withLogger(log) : null;
         long timeoutMs = resolveTimeout(ctx);
         return Completable.fromAction(() -> GraalJsEngine.eval(script, timeoutMs, bindings, logger))
             .subscribeOn(Schedulers.io())
@@ -238,6 +239,14 @@ public class JsPolicy implements HttpPolicy {
         }
         long timeout = config.getProperty(TIMEOUT_PROPERTY, Long.class, GraalJsEngine.DEFAULT_TIMEOUT_MS);
         return Math.max(MIN_TIMEOUT_MS, Math.min(timeout, MAX_TIMEOUT_MS));
+    }
+
+    private boolean isConsoleEnabled(HttpBaseExecutionContext ctx) {
+        Configuration config = ctx.getComponent(Configuration.class);
+        if (config == null) {
+            return false;
+        }
+        return config.getProperty(CONSOLE_PROPERTY, Boolean.class, false);
     }
 
     private ExecutionFailure toFailure(BaseExecutionContext ctx, Throwable e) {
