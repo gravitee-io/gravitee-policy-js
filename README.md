@@ -21,14 +21,23 @@ It replaces the legacy Nashorn-based `gravitee-policy-javascript` policy, which 
 
 Scripts run with **ECMAScript 2023** (ES14) support. You can use modern syntax: `let`/`const`, arrow functions, template literals, destructuring, optional chaining (`?.`), nullish coalescing (`??`), and more.
 
-Each execution runs in a **sandboxed context** with a **100ms timeout**. The sandbox enforces strict isolation:
+Each execution runs in a **sandboxed context** with a configurable timeout (default: **100ms**). The sandbox enforces strict isolation:
 
 - No Java interop (`Java.type()`, `Polyglot.eval()`, etc.)
 - No file system, network, or native access
 - No thread creation or process execution
 - No global state shared between executions
 
-`console.log()` and `console.error()` are available and routed to the gateway logs (SLF4J).
+`console.log()` and `console.error()` are available but disabled by default (output is silently discarded). Both console output and script timeout can be configured in `gravitee.yml`:
+
+```yaml
+policy:
+  js:
+    timeout: 100    # script timeout in ms (default: 100, min: 10, max: 10000)
+    console: true   # enable console.log/console.error to gateway logs (default: false)
+```
+
+When enabled, console output is routed to the gateway logs (SLF4J).
 
 > **Security note:** Scripts have read access to all context attributes, dictionaries, and properties available at execution time. If sensitive data (API keys, tokens, internal identifiers) is present in the execution context, it will be accessible to the script. Make sure your scripts are reviewed and trusted before deployment, especially when using context attributes from upstream policies.
 
@@ -310,8 +319,8 @@ Applicable to `request.headers()`, `response.headers()`, `response.trailers()`, 
 | `atob(string)`          | Decode a Base64 string.            |
 | `Base64.encode(string)` | Encode a string to Base64.         |
 | `Base64.decode(string)` | Decode a Base64 string.            |
-| `console.log(message)`  | Log to gateway logs (INFO level).  |
-| `console.error(message)`| Log to gateway logs (ERROR level). |
+| `console.log(message)`  | Log to gateway logs (INFO level). Requires `policy.js.console: true` in `gravitee.yml`.  |
+| `console.error(message)`| Log to gateway logs (ERROR level). Requires `policy.js.console: true` in `gravitee.yml`. |
 
 ---
 
@@ -327,7 +336,7 @@ Key differences with the legacy policy:
 | `httpClient`              | Available (deprecated)     | Removed — use the Callout HTTP policy                        |
 | `method()` / `version()`  | Java enum                  | String (`"GET"`, `"HTTP_1_1"`)                               |
 | Phase-specific scripts    | `onRequestScript`, etc.    | Single `script` field                                        |
-| Sandbox                   | Minimal (binding cleanup)  | Strict (no Java access, no I/O, 100ms timeout)               |
+| Sandbox                   | Minimal (binding cleanup)  | Strict (no Java access, no I/O, configurable timeout)         |
 | `Base64`                  | Not available              | `Base64.encode()` / `Base64.decode()` / `btoa()` / `atob()` |
 
 ### Migration example
@@ -388,10 +397,21 @@ Strikethrough text indicates that a version is deprecated.
 #### 
 | Name <br>`json name`  | Type <br>`constraint`  | Mandatory  | Default  | Description  |
 |:----------------------|:-----------------------|:----------:|:---------|:-------------|
-| Override content<br>`overrideContent`| boolean|  | | Enable to override the content with the value returned by your script.|
 | Read content<br>`readContent`| boolean|  | | Enable to read the content of the request or response in your script.|
 | Script<br>`script`| string| ✅| `request.headers().set('X-Custom', 'value');`| JavaScript script to evaluate.|
+| Read Content<br>`readContent`| object| ✅| | Read Content of <br>Values: `true` `false`|
 
+
+#### :  `readContent = true` 
+| Name <br>`json name`  | Type <br>`constraint`  | Mandatory  | Default  | Description  |
+|:----------------------|:-----------------------|:----------:|:---------|:-------------|
+| Override content<br>`overrideContent`| boolean|  | | Enable to override the content with the value returned by your script.|
+
+
+#### :  `readContent = false` 
+| Name <br>`json name`  | Type <br>`constraint`  | Mandatory  | Default  | Description  |
+|:----------------------|:-----------------------|:----------:|:---------|:-------------|
+| No properties | | | | | | | 
 
 
 
