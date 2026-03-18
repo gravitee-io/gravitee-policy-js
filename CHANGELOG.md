@@ -1,3 +1,15 @@
+# [1.0.0-alpha.5](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.4...1.0.0-alpha.5) (2026-03-18)
+
+
+### Bug Fixes
+
+* clean up schema-form for new console UI ([dd69cfe](https://github.com/gravitee-io/gravitee-policy-js/commit/dd69cfe80b460f61c515d92f5931a563b7d345aa))
+
+
+### Features
+
+* make console.log/console.error configurable via gravitee.yml ([db84a38](https://github.com/gravitee-io/gravitee-policy-js/commit/db84a38de963185544cc9a13bd6ed27c7c36d041))
+
 # [1.0.0-alpha.4](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.3...1.0.0-alpha.4) (2026-03-16)
 
 
