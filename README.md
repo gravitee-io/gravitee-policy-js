@@ -619,6 +619,13 @@ spec:
 
 ## Changelog
 
+### [1.0.0-alpha.6](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.5...1.0.0-alpha.6) (2026-03-23)
+
+
+##### Features
+
+* add javascript policy icon ([216a1b2](https://github.com/gravitee-io/gravitee-policy-js/commit/216a1b2f97ae9d20ccd69f0fdc40a1e5e31c825a))
+
 ### [1.0.0-alpha.5](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.4...1.0.0-alpha.5) (2026-03-18)
 
 
