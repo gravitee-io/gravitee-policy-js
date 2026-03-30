@@ -1,3 +1,4 @@
 {
-    "extends": ["gravitee-io/renovate-config:plugin"]
+    "extends": ["gravitee-io/renovate-config:plugin"],
+    "baseBranches": ["main", "alpha"]
 }
