@@ -35,7 +35,7 @@
 
     <properties>
         <gravitee-apim.version>4.10.9</gravitee-apim.version>
-        <gravitee-gateway-api.version>5.0.0-alpha.2</gravitee-gateway-api.version>
+        <gravitee-gateway-api.version>5.1.1</gravitee-gateway-api.version>
         <gravitee-node.version>8.0.1</gravitee-node.version>
         <graalvm.version>23.1.10</graalvm.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
