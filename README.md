@@ -619,6 +619,13 @@ spec:
 
 ## Changelog
 
+### [1.0.0-alpha.7](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.6...1.0.0-alpha.7) (2026-04-01)
+
+
+##### Bug Fixes
+
+* **deps:** clean project configuration ([f1a6e45](https://github.com/gravitee-io/gravitee-policy-js/commit/f1a6e456ccd3a629d84eb20ce692e69c7f7400f6))
+
 ### [1.0.0-alpha.6](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.5...1.0.0-alpha.6) (2026-03-23)
 
 
