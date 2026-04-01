@@ -34,14 +34,16 @@
     </parent>
 
     <properties>
-        <gravitee-apim.version>4.10.9</gravitee-apim.version>
-        <gravitee-gateway-api.version>5.1.1</gravitee-gateway-api.version>
-        <gravitee-node.version>8.0.1</gravitee-node.version>
+        <gravitee-apim.version>4.11.0-alpha.2</gravitee-apim.version>
+
         <graalvm.version>23.1.10</graalvm.version>
-        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
-        <gravitee-entrypoint-http-get.version>2.1.0</gravitee-entrypoint-http-get.version>
-        <gravitee-entrypoint-http-post.version>2.1.0</gravitee-entrypoint-http-post.version>
+
+        <gravitee-entrypoint-http-get.version>3.0.0</gravitee-entrypoint-http-get.version>
+        <gravitee-entrypoint-http-post.version>3.0.0</gravitee-entrypoint-http-post.version>
         <gravitee-reactor-message.version>10.0.0</gravitee-reactor-message.version>
+
+        <properties-maven-plugin.version>1.3.0</properties-maven-plugin.version>
+
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
     </properties>
 
@@ -62,7 +64,6 @@
         <dependency>
             <groupId>io.gravitee.gateway</groupId>
             <artifactId>gravitee-gateway-api</artifactId>
-            <version>${gravitee-gateway-api.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -87,7 +88,6 @@
         <dependency>
             <groupId>io.gravitee.node</groupId>
             <artifactId>gravitee-node-logging</artifactId>
-            <version>${gravitee-node.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -191,7 +191,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.2.1</version>
+                <version>${properties-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>initialize</phase>
@@ -210,7 +210,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven-assembly-plugin.version}</version>
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
