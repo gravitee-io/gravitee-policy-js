@@ -38,7 +38,10 @@ import io.gravitee.policy.js.engine.GraalJsEngine;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.MaybeTransformer;
+import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.vertx.core.Vertx;
+import io.vertx.rxjava3.RxHelper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.graalvm.polyglot.PolyglotException;
@@ -104,6 +107,7 @@ public class JsPolicy implements HttpPolicy {
         long timeoutMs = resolveTimeout(ctx);
         return Completable.fromAction(() -> GraalJsEngine.eval(script, timeoutMs, bindings, logger))
             .subscribeOn(Schedulers.io())
+            .observeOn(eventLoopScheduler())
             .onErrorResumeNext(e -> ctx.interruptWith(toFailure(ctx, e)))
             .andThen(Completable.defer(() -> checkResult(ctx, result)));
     }
@@ -116,7 +120,6 @@ public class JsPolicy implements HttpPolicy {
         var logger = isConsoleEnabled(ctx) ? ctx.withLogger(log) : null;
         boolean override = configuration.isOverrideContent();
         boolean isRequest = phase == Phase.REQUEST;
-
         MaybeTransformer<Buffer, Buffer> transformer = upstream ->
             upstream
                 .defaultIfEmpty(Buffer.buffer())
@@ -128,6 +131,7 @@ public class JsPolicy implements HttpPolicy {
                     }
                     return Completable.fromAction(() -> GraalJsEngine.eval(script, resolveTimeout(ctx), bindings, logger))
                         .subscribeOn(Schedulers.io())
+                        .observeOn(eventLoopScheduler())
                         .onErrorResumeNext(e -> ctx.interruptBodyWith(toFailure(ctx, e)).ignoreElement())
                         .andThen(Completable.defer(() -> checkResult(ctx, result)))
                         .andThen(
@@ -158,6 +162,7 @@ public class JsPolicy implements HttpPolicy {
         long timeoutMs = resolveTimeout(ctx);
         return Completable.fromAction(() -> GraalJsEngine.eval(script, timeoutMs, bindings, logger))
             .subscribeOn(Schedulers.io())
+            .observeOn(eventLoopScheduler())
             .onErrorResumeNext(e -> ctx.interruptMessageWith(toFailure(ctx, e)).ignoreElement())
             .andThen(Completable.defer(() -> checkResult(ctx, result)))
             .andThen(Maybe.just(message));
@@ -230,6 +235,14 @@ public class JsPolicy implements HttpPolicy {
     enum Phase {
         REQUEST,
         RESPONSE,
+    }
+
+    private static Scheduler eventLoopScheduler() {
+        var vertxCtx = Vertx.currentContext();
+        if (vertxCtx != null) {
+            return RxHelper.scheduler(vertxCtx);
+        }
+        return Schedulers.computation();
     }
 
     private long resolveTimeout(HttpBaseExecutionContext ctx) {
