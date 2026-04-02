@@ -619,6 +619,13 @@ spec:
 
 ## Changelog
 
+### [1.0.0-alpha.8](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.7...1.0.0-alpha.8) (2026-04-02)
+
+
+##### Bug Fixes
+
+* restore event loop thread after schedulers.io execution ([116216a](https://github.com/gravitee-io/gravitee-policy-js/commit/116216a10670d7b2353c521a8a4f7f8f6ae2dd55))
+
 ### [1.0.0-alpha.7](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0-alpha.6...1.0.0-alpha.7) (2026-04-01)
 
 
