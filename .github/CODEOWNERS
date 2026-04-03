@@ -1,0 +1,6 @@
+# Default
+*             @gravitee-io/apim @gravitee-io/cockpit
+pom.xml       @gravitee-io/apim @gravitee-io/cockpit app/renovate-approve
+/.docgen/     @gravitee-io/tech-writers
+/docs/        @gravitee-io/tech-writers
+README.md     @gravitee-io/tech-writers
