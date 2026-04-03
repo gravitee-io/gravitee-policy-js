@@ -1,0 +1,47 @@
+{
+    "id": "api-response-conditional",
+    "name": "api-response-conditional",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "proxy",
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [{ "path": "/test" }],
+            "entrypoints": [{ "type": "http-proxy" }]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "http-proxy",
+            "endpoints": [
+                {
+                    "name": "backend",
+                    "type": "http-proxy",
+                    "configuration": { "target": "http://localhost:8080/team" }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [{ "type": "http", "path": "/", "pathOperator": "STARTS_WITH" }],
+            "response": [
+                {
+                    "name": "JS",
+                    "enabled": true,
+                    "policy": "js",
+                    "configuration": {
+                        "readContent": true,
+                        "overrideContent": true,
+                        "script": "var status = response.status();\nif (status >= 400) {\n    var error = { error: true, status: status, message: 'Backend error' };\n    response.content(JSON.stringify(error));\n    response.headers().set('X-Error-Handled', 'true');\n} else {\n    var body = JSON.parse(response.content());\n    body.enriched = true;\n    response.content(JSON.stringify(body));\n    response.headers().set('X-Enriched', 'true');\n}"
+                    }
+                }
+            ],
+            "request": []
+        }
+    ]
+}

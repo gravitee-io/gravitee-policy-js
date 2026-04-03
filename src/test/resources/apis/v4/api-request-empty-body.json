@@ -1,0 +1,47 @@
+{
+    "id": "api-request-empty-body",
+    "name": "api-request-empty-body",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "proxy",
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [{ "path": "/test" }],
+            "entrypoints": [{ "type": "http-proxy" }]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "http-proxy",
+            "endpoints": [
+                {
+                    "name": "backend",
+                    "type": "http-proxy",
+                    "configuration": { "target": "http://localhost:8080/team" }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [{ "type": "http", "path": "/", "pathOperator": "STARTS_WITH" }],
+            "request": [
+                {
+                    "name": "JS",
+                    "enabled": true,
+                    "policy": "js",
+                    "configuration": {
+                        "readContent": true,
+                        "overrideContent": true,
+                        "script": "var body = request.content();\nif (!body || body.trim() === '') {\n    request.content('{\"default\":true}');\n    request.headers().set('X-Body', 'generated');\n} else {\n    request.headers().set('X-Body', 'original');\n}"
+                    }
+                }
+            ],
+            "response": []
+        }
+    ]
+}
