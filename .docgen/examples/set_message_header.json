@@ -1,0 +1,5 @@
+{
+    "readContent": false,
+    "overrideContent": false,
+    "script": "message.headers().set('X-Js-Policy', 'ok');"
+}
