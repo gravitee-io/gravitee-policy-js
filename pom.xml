@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.policy</groupId>
     <artifactId>gravitee-policy-js</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-alpha.8</version>
 
     <name>Gravitee.io APIM - Policy - JS</name>
     <description>Execute JavaScript scripts at any stage of request or message processing through the gateway</description>
@@ -34,9 +34,16 @@
     </parent>
 
     <properties>
-        <gravitee-apim.version>4.10.7</gravitee-apim.version>
-        <graalvm.version>24.1.1</graalvm.version>
-        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <gravitee-apim.version>4.11.0</gravitee-apim.version>
+
+        <graalvm.version>23.1.10</graalvm.version>
+
+        <gravitee-entrypoint-http-get.version>3.0.0</gravitee-entrypoint-http-get.version>
+        <gravitee-entrypoint-http-post.version>3.0.0</gravitee-entrypoint-http-post.version>
+        <gravitee-reactor-message.version>10.0.0</gravitee-reactor-message.version>
+
+        <properties-maven-plugin.version>1.3.0</properties-maven-plugin.version>
+
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
     </properties>
 
@@ -75,6 +82,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.gravitee.node</groupId>
+            <artifactId>gravitee-node-logging</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -140,6 +153,27 @@
         </dependency>
 
         <dependency>
+            <groupId>com.graviteesource.entrypoint</groupId>
+            <artifactId>gravitee-entrypoint-http-get</artifactId>
+            <version>${gravitee-entrypoint-http-get.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.graviteesource.entrypoint</groupId>
+            <artifactId>gravitee-entrypoint-http-post</artifactId>
+            <version>${gravitee-entrypoint-http-post.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.graviteesource.reactor</groupId>
+            <artifactId>gravitee-reactor-message</artifactId>
+            <version>${gravitee-reactor-message.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
@@ -157,7 +191,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.2.1</version>
+                <version>${properties-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>initialize</phase>
@@ -176,7 +210,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven-assembly-plugin.version}</version>
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
