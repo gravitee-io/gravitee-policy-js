@@ -34,7 +34,7 @@
     </parent>
 
     <properties>
-        <gravitee-apim.version>4.10.7</gravitee-apim.version>
+        <gravitee-apim.version>4.11.1</gravitee-apim.version>
         <graalvm.version>24.1.1</graalvm.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
