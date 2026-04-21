@@ -36,7 +36,7 @@
     <properties>
         <gravitee-apim.version>4.11.4</gravitee-apim.version>
 
-        <graalvm.version>23.1.10</graalvm.version>
+        <graalvm.version>23.1.11</graalvm.version>
 
         <gravitee-entrypoint-http-get.version>3.0.0</gravitee-entrypoint-http-get.version>
         <gravitee-entrypoint-http-post.version>3.0.0</gravitee-entrypoint-http-post.version>
