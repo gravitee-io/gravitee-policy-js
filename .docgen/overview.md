@@ -4,4 +4,4 @@ It replaces the legacy Nashorn-based `gravitee-policy-javascript` policy, which 
 
 > **Note:** This policy supports V4 APIs only (Proxy and Message). V2 APIs are not supported.
 
-> **Note:** You might receive an error when running this policy on the default Alpine-based gateway image. To resolve, use the Debian variant of the gateway image, e.g. `graviteeio/apim-gateway:latest-debian`. A fix for the default Alpine image is in progress.
+> **Note:** On older default (Alpine) gateway images, you may receive errors when running this policy. This is resolved in the following patch releases (and later): **4.8.29, 4.9.22, 4.10.17, 4.11.10**. If you're on an earlier image, upgrade to one of these — or use the Debian variant of the gateway image, e.g. `graviteeio/apim-gateway:<version>-debian`.
