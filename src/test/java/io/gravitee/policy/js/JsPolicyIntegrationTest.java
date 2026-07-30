@@ -44,8 +44,12 @@ import io.vertx.rxjava3.core.buffer.Buffer;
 import io.vertx.rxjava3.core.http.HttpClient;
 import io.vertx.rxjava3.core.http.HttpClientRequest;
 import io.vertx.rxjava3.core.http.HttpClientResponse;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +60,10 @@ public class JsPolicyIntegrationTest {
 
     private static final JsonObject GIVEN_CONTENT = new JsonObject("{\"message\":\"Hello World!\"}");
     private static final JsonObject EXPECTED_CONTENT = new JsonObject("{\"message\":\"Hello Universe!\"}");
+    private static final String EVENT_STREAM = "text/event-stream";
+    private static final String CHUNKED_BODY = "data: one\n\ndata: two\n\ndata: three\n\n";
+    private static final int BACKEND_CHUNKS = 3;
+    private static final int DRIBBLE_DURATION_MS = 900;
 
     @GatewayTest
     @Nested
@@ -526,7 +534,106 @@ public class JsPolicyIntegrationTest {
                 .assertComplete()
                 .assertNoErrors();
         }
+
+        /**
+         * The gateway skips body transformation on `text/event-stream` responses, so the script never runs at all: a
+         * throwing script goes unnoticed and the stream reaches the client untouched. This is what makes the policy safe
+         * to enable on streaming API types, and what makes `readContent`/`overrideContent` silent no-ops there.
+         * <p>
+         * This characterises gateway behaviour rather than policy behaviour: an APIM upgrade that changes how streaming
+         * responses are handled will surface here first.
+         */
+        @Test
+        @DeployApi("/apis/v4/api-response-sse-no-execution.json")
+        void should_not_run_script_on_sse_response(HttpClient client) {
+            stubChunkedBackend(EVENT_STREAM);
+
+            var response = collectResponse(client, 200);
+
+            assertThat(response.chunkArrivals()).hasSizeGreaterThan(1);
+            assertThat(response.body()).isEqualTo(CHUNKED_BODY);
+            assertThat(response.headers()).doesNotContainKey("content-length");
+        }
+
+        /**
+         * With `readContent` off the script runs in the plain response phase, which leaves the stream alone.
+         */
+        @Test
+        @DeployApi("/apis/v4/api-response-sse-passthrough.json")
+        void should_run_script_on_sse_response_without_reading_content(HttpClient client) {
+            stubChunkedBackend(EVENT_STREAM);
+
+            var response = collectResponse(client, 200);
+
+            assertThat(response.headers()).containsEntry("x-js-passthrough", "true");
+            assertThat(response.chunkArrivals()).hasSizeGreaterThan(1);
+            assertThat(response.body()).isEqualTo(CHUNKED_BODY);
+        }
+
+        /**
+         * A chunked response that is not `text/event-stream` does go through the script, which means the whole body is
+         * aggregated first: nothing reaches the client before the backend has finished.
+         */
+        @Test
+        @DeployApi("/apis/v4/api-response-chunked-json.json")
+        void should_aggregate_chunked_response_when_reading_content(HttpClient client) {
+            stubChunkedBackend(MediaType.APPLICATION_JSON);
+
+            var response = collectResponse(client, 200);
+
+            assertThat(response.headers()).containsEntry("x-js-events", "3");
+            assertThat(response.body()).isEqualTo(CHUNKED_BODY);
+            assertThat(response.chunkArrivals()).hasSize(1);
+            assertThat(response.chunkArrivals().getFirst()).isGreaterThanOrEqualTo(DRIBBLE_DURATION_MS);
+        }
+
+        /**
+         * The payload is the same whatever the content type, so that the content type stays the only variable between
+         * the streaming cases and the aggregated one.
+         */
+        private void stubChunkedBackend(String contentType) {
+            wiremock.stubFor(
+                get("/events").willReturn(
+                    ok(CHUNKED_BODY)
+                        .withHeader(HttpHeaderNames.CONTENT_TYPE.toString(), contentType)
+                        .withChunkedDribbleDelay(BACKEND_CHUNKS, DRIBBLE_DURATION_MS)
+                )
+            );
+        }
+
+        private ClientView collectResponse(HttpClient client, int expectedStatus) {
+            var chunkArrivals = new CopyOnWriteArrayList<Long>();
+            var body = new StringBuilder();
+            var headers = new HashMap<String, String>();
+            long start = System.currentTimeMillis();
+
+            client
+                .rxRequest(GET, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(expectedStatus))
+                .doOnSuccess(response ->
+                    response.headers().forEach(header -> headers.put(header.getKey().toLowerCase(Locale.ROOT), header.getValue()))
+                )
+                .flatMapPublisher(HttpClientResponse::toFlowable)
+                .doOnNext(chunk -> {
+                    chunkArrivals.add(System.currentTimeMillis() - start);
+                    body.append(chunk);
+                })
+                .test()
+                .awaitDone(10, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            return new ClientView(headers, body.toString(), chunkArrivals);
+        }
     }
+
+    /**
+     * A response as seen by the client. Header names are lower-cased, since HTTP header case is not significant and the
+     * gateway is not consistent about it. {@code chunkArrivals} holds the elapsed time in ms at which each body chunk
+     * arrived: a single arrival means the gateway aggregated the whole stream before flushing it.
+     */
+    record ClientView(Map<String, String> headers, String body, List<Long> chunkArrivals) {}
 
     abstract static class AbstractMessageTest extends AbstractPolicyTest<JsPolicy, JsPolicyConfiguration> {
 
