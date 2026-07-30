@@ -71,6 +71,10 @@ content[0].country = 'US';
 response.content(JSON.stringify(content));
 ```
 
+> **Note:** Content transformation does not apply to `text/event-stream` responses. The gateway streams them straight through, so **Read content** and **Override content** have no effect and the script is not executed in the response body phase. Scripts that only read or set headers still run, as long as **Read content** is disabled.
+
+> **Note:** On any other chunked response, enabling **Read content** makes the gateway buffer the whole body before running your script, so the response is no longer streamed to the client incrementally.
+
 ---
 
 ## Context attributes
