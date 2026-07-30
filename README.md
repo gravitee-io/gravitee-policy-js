@@ -12,7 +12,7 @@ This policy lets you execute custom JavaScript scripts at any stage of request o
 
 It replaces the legacy Nashorn-based `gravitee-policy-javascript` policy, which has been deprecated due to Nashorn's removal from recent JDKs. This is a new policy built from scratch — not a migration — and existing scripts may require adjustments.
 
-> **Note:** This policy supports V4 APIs only (Proxy and Message). V2 APIs are not supported.
+> **Note:** This policy supports V4 APIs only (Proxy, Message, MCP Proxy, LLM Proxy and A2A Proxy). V2 APIs are not supported.
 
 > **Note:** On older default (Alpine) gateway images, you may receive errors when running this policy. This is resolved in the following patch releases (and later): **4.8.29, 4.9.22, 4.10.17, 4.11.10**. If you're on an earlier image, upgrade to one of these — or use the Debian variant of the gateway image, e.g. `graviteeio/apim-gateway:<version>-debian`.
 
@@ -91,6 +91,10 @@ content[0].firstname = 'Modified ' + content[0].firstname;
 content[0].country = 'US';
 response.content(JSON.stringify(content));
 ```
+
+> **Note:** Content transformation does not apply to `text/event-stream` responses. The gateway streams them straight through, so **Read content** and **Override content** have no effect and the script is not executed in the response body phase. Scripts that only read or set headers still run, as long as **Read content** is disabled.
+
+> **Note:** On any other chunked response, enabling **Read content** makes the gateway buffer the whole body before running your script, so the response is no longer streamed to the client incrementally.
 
 ---
 
@@ -377,6 +381,9 @@ The `js` policy can be applied to the following API types and flow phases.
 
 * `PROXY`
 * `MESSAGE`
+* `MCP PROXY`
+* `LLM PROXY`
+* `A2A PROXY`
 
 ### Supported flow phases:
 
