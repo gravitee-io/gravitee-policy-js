@@ -585,6 +585,13 @@ spec:
 
 ## Changelog
 
+### [1.1.0](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.1...1.1.0) (2026-08-03)
+
+
+##### Features
+
+* support JDK 25 by upgrading GraalVM to 25.2.4 ([f6900a5](https://github.com/gravitee-io/gravitee-policy-js/commit/f6900a515a6ce5fc82567206a70d50c411e398b9))
+
 #### [1.0.1](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.0...1.0.1) (2026-06-19)
 
 
