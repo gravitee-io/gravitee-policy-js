@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/gravitee-io/gravitee-policy-js/compare/1.1.0...1.2.0) (2026-08-03)
+
+
+### Features
+
+* enable MCP, LLM and A2A proxy API types ([01d08eb](https://github.com/gravitee-io/gravitee-policy-js/commit/01d08ebccfe9d5370e24314462309a91056ec348))
+
 # [1.1.0](https://github.com/gravitee-io/gravitee-policy-js/compare/1.0.1...1.1.0) (2026-08-03)
 
 
