@@ -397,7 +397,8 @@ Strikethrough text indicates that a version is deprecated.
 
 | Plugin version| APIM| Java version |
 | --- | --- | ---  |
-|1.1.0 and after|4.11.x and after|21, 25 |
+|2.0.0 and after|4.13.x and after|25 |
+|1.1.0 to 1.2.0|4.11.x and after|21, 25 |
 |1.0.0 to 1.0.1|4.11.x to 4.12.x|21 |
 
 
