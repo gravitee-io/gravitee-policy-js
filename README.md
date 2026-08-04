@@ -592,6 +592,18 @@ spec:
 
 ## Changelog
 
+### [2.0.0](https://github.com/gravitee-io/gravitee-policy-js/compare/1.2.0...2.0.0) (2026-08-04)
+
+
+##### chore
+
+* **deps:** update gravitee-parent to v25 ([4fc68c6](https://github.com/gravitee-io/gravitee-policy-js/commit/4fc68c6f29c3fb95c31a9a888df01075cc29ea1c))
+
+
+##### BREAKING CHANGES
+
+* **deps:** Requires JDK 25
+
 ### [1.2.0](https://github.com/gravitee-io/gravitee-policy-js/compare/1.1.0...1.2.0) (2026-08-03)
 
 
